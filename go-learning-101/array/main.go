@@ -4,5 +4,5 @@ func main() {
 	SampleArray()
 	SampleArray2()
 	ArrayMultiDimensional()
-	// ArraySlice()
+	Slice()
 }

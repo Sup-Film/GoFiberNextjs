@@ -27,6 +27,10 @@ func SampleArray() {
 	fmt.Println("จำนวนสมาชิกใน Array:", len(fruits))
 	fmt.Println("--------------------------------------------------")
 
+	// * Capacity ของ Array
+	fmt.Println("Capacity ของ Array:", cap(fruits))
+	fmt.Println("--------------------------------------------------")
+
 }
 
 // * การสร้าง Array และกำหนดสมาชิก
@@ -53,6 +57,7 @@ func SampleArray2() {
 	// * แต่ไม่สามารถเพิ่มสมาชิกได้ภายหลัง
 	var array1 = [...]int{1, 2, 3, 4, 5}                // ใช้ ... เพื่อให้ Go คำนวณขนาดของ Array อัตโนมัติ
 	fmt.Println("Array แบบไม่จำกัดขนาดสมาชิก:", array1) // [1 2 3 4 5]
+	fmt.Println("--------------------------------------------------")
 
 }
 
@@ -61,6 +66,7 @@ func ArrayMultiDimensional() {
 	var multiDimensional = [2][3]int{{1, 2, 3}, {4, 5, 6}}
 
 	for i, row := range multiDimensional {
+		fmt.Println("Row", i, ":", row)
 		for j, valie := range row {
 			fmt.Printf("Value at [%d][%d]: %d\n", i, j, valie)
 		}
@@ -75,4 +81,21 @@ func ArrayMultiDimensional() {
 			fmt.Printf("Matrix[%d][%d]: %d\n", i, j, value)
 		}
 	}
+	fmt.Println("--------------------------------------------------")
+}
+
+func Slice() {
+	// * สร้าง Slice จาก Array
+	var fruits = [7]string{"Apple", "Banana", "Cherry", "Date", "Elderberry", "Fig", "Grape"}
+
+	// * เป็นการเข้าถึงสมาชิกใน Array โดยการกำหนด start:end โดย จะเอาตั้งแต่ตัวที่ start ถึงตัวที่ end-1
+	var slice1 = fruits[1:4] // สร้าง Slice จากสมาชิกที่ 1 ถึง 3 (ไม่รวมสมาชิกที่ 4)
+
+	// * Capacity ของ Slice จะนับจากตำแหน่งที่ Slice เริ่มต้นไปจนถึงความยาวของ Array
+	fmt.Println("Capacity ของ Slice fruits:", cap(slice1)) // 4
+
+	// * len ของ Slice จะนับจำนวนสมาชิกที่มีอยู่ใน Slice
+	fmt.Println("Length ของ Slice fruits:", len(slice1)) // 3
+
+	fmt.Println("Slice จาก Array fruits:", slice1) // [Banana Cherry Date]
 }
