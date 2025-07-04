@@ -17,5 +17,5 @@ func main() {
 	// เรียกใช้ฟังก์ชัน SamplePointer2 เพื่อเปลี่ยนสีเตียงของห้อง
 	// โดยส่ง Pointer ของ Struct Room เข้าไป
 	SamplePointer2()
-	
+
 }
