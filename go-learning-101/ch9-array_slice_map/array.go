@@ -88,6 +88,8 @@ func Slice() {
 	// * สร้าง Slice จาก Array
 	var fruits = [7]string{"Apple", "Banana", "Cherry", "Date", "Elderberry", "Fig", "Grape"}
 
+	fmt.Println("Array fruits:", fruits)
+
 	// * เป็นการเข้าถึงสมาชิกใน Array โดยการกำหนด start:end โดย จะเอาตั้งแต่ตัวที่ start ถึงตัวที่ end-1
 	var slice1 = fruits[1:4] // สร้าง Slice จากสมาชิกที่ 1 ถึง 3 (ไม่รวมสมาชิกที่ 4)
 
@@ -98,4 +100,10 @@ func Slice() {
 	fmt.Println("Length ของ Slice fruits:", len(slice1)) // 3
 
 	fmt.Println("Slice จาก Array fruits:", slice1) // [Banana Cherry Date]
+
+	subSlibe := fruits[:5]                               // สร้าง Slice จากสมาชิกที่ 0 ถึง 4 (ไม่รวมสมาชิกที่ 5)
+	fmt.Println("Slice จากสมาชิกที่ 0 ถึง 4:", subSlibe) // [Apple Banana Cherry Date Elderberry]
+
+	subSlibe2 := fruits[2:]                                     // สร้าง Slice จากสมาชิกที่ 2 ถึงจบ Array
+	fmt.Println("Slice จากสมาชิกที่ 2 ถึงจบ Array:", subSlibe2) // [Cherry Date Elderberry Fig Grape]
 }
