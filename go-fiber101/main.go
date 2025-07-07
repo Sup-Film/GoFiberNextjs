@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -86,6 +88,196 @@ func main() {
 		// ดึงค่าพารามิเตอร์ "id" จาก URL
 		id := c.Params("id")
 		return c.SendString("Product ID: " + id)
+	})
+
+	// * การกำหนด Route แบบ Regex
+	// กำหนด Route ที่มีพารามิเตอร์ที่ต้องเป็นตัวเลข 5 หลัก
+	// ตัวอย่าง URL: http://localhost:3000/regex/12345 (ตัวเลข 5 หลักเท่านั้น)
+	// ใช้ Regular Expression เพื่อกำหนดรูปแบบพารามิเตอร์
+	// รูปแบบ: :parameter<regex(pattern)>
+	app.Get(`/regex/:id<regex(\d{5})>`, func(c *fiber.Ctx) error {
+		// ดึงค่าพารามิเตอร์ "id" จาก URL
+		id := c.Params("id")
+		return c.SendString("Product ID: " + id)
+	})
+
+	// กำหนด Route เป็นรูปแบบวันที่ YYYY-MM-DD (ต้องตรงทุกตัวอักษร)
+	// ตัวอย่าง URL: http://localhost:3000/date/2025-02-02 (ต้องตรง 10 ตัวอักษรพอดี)
+	// ใช้ ^ และ $ เพื่อบังคับให้ match ทั้งหมด
+	// รูปแบบ: :parameter<regex(^pattern$)>
+	app.Get(`/date/:date<regex(^\d{4}-\d{2}-\d{2}$)>`, func(c *fiber.Ctx) error {
+		// ดึงค่าพารามิเตอร์ "date" จาก URL
+		date := c.Params("date")
+		return c.SendString("Date: " + date)
+	})
+
+	// --------------------------------------------------
+	// * การกำหนด Route แบบ HTTP Method ต่าง ๆ
+	// รับค่า GET, POST, PUT, DELETE จาก Request
+
+	// กำหนด Struct Person สำหรับการรับข้อมูล JSON
+	type Person struct {
+		ID    int    `json:"id"` // "id" จะไปแมพกับ JSON key "id" ที่ส่งเข้ามา
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}
+
+	// ตัวแปรเก็บข้อมูลผู้ใช้ โดยใช้ slice ของ struct Person
+	var people []Person = []Person{
+		{ID: 1, Name: "John Doe", Email: "john@example.com"},
+	}
+
+	// GET: ดึงข้อมูลผู้ใช้ทั้งหมด
+	// ตัวอย่าง URL: http://localhost:3000/users
+	app.Get("/users", func(c *fiber.Ctx) error {
+		// ส่งข้อมูลผู้ใช้ทั้งหมดกลับไปยังผู้ใช้ในรูปแบบ JSON
+		return c.JSON(fiber.Map{
+			"message": "All users retrieved successfully",
+			"data":    people,
+			"count":   len(people),
+		})
+	})
+
+	// POST: สร้างผู้ใช้ใหม่
+	// ตัวอย่าง URL: http://localhost:3000/users
+	// ตัวอย่าง JSON ที่ส่งมาใน Request Body:
+	// {
+	//   "id": 2,
+	//   "name": "Jane Doe",
+	//   "email": "jane@example.com"
+	// }
+	// ใช้ c.BodyParser() เพื่อแปลง JSON ที่ส่งมาเป็น struct Person
+	app.Post("/users", func(c *fiber.Ctx) error {
+		// สร้างตัวแปรสำหรับเก็บผู้ใช้ใหม่ เป็นตัวแปร Pointer ที่ชี้ไปยัง struct Person
+		person := new(Person)
+		// แปลง JSON ที่ส่งมาใน Body เป็น struct Person
+		// ถ้าเกิดข้อผิดพลาดในการแปลง JSON ให้ส่งข้อความผิดพลาดกลับไป
+		if err := c.BodyParser(person); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Invalid request data",
+				"error":   err.Error(),
+			})
+		}
+
+		// เพิ่มผู้ใช้ใหม่เข้าไปใน slice ของผู้ใช้
+		// ใช้ Pointer เพื่อนำค่าใน struct เข้าไปใน slice
+		people = append(people, *person)
+
+		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+			"message": "User created successfully",
+			"data":    person,
+			"count":   len(people),
+		})
+	})
+
+	// GET: ดึงข้อมูลผู้ใช้ตาม ID
+	// ตัวอย่าง URL: http://localhost:3000/users/1
+	// ถ้าไม่พบผู้ใช้ที่มี ID ตรงกับที่ระบุ ให้ส่งข้อความผิดพลาดกลับไป
+	app.Get("/users/:id", func(c *fiber.Ctx) error {
+		id := c.Params("id")
+
+		// แปลง ID เป็นตัวเลข
+		idInt, err := strconv.Atoi(id)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Invalid user ID",
+			})
+		}
+
+		// ค้นหาผู้ใช้ที่มี ID ตรงกับที่ระบุ เนื่องจากเราใช้เป็น slice เราต้องวนลูปค่าเพื่อหา ID
+		for _, person := range people {
+			if person.ID == idInt {
+				return c.Status(fiber.StatusFound).JSON(fiber.Map{
+					"message": "User retrieved successfully",
+					"data":    person,
+				})
+			}
+		}
+
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "User not found",
+			"data":    nil,
+		})
+	})
+
+	// UPDATE: อัปเดตข้อมูลผู้ใช้ตาม ID
+	// ตัวอย่าง URL: http://localhost:3000/users/1
+	// ถ้าไม่พบผู้ใช้ที่มี ID ตรงกับที่ระบุ ให้ส่งข้อความผิดพลาดกลับไป
+	// ต้องส่งข้อมูล JSON ที่ต้องการอัปเดตใน Request Body
+	// {
+	//   "name": "John Smith",
+	//   "email": "john.smith@example.com"
+	// }
+	app.Put("/users/:id", func(c *fiber.Ctx) error {
+		id := c.Params("id")
+
+		// แปลง ID เป็นตัวเลข
+		idInt, err := strconv.Atoi(id)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Invalid user ID",
+			})
+		}
+
+		// สร้างตัวแปรสำหรับเก็บข้อมูลผู้ใช้ใหม่
+		person := new(Person)
+
+		// แปลง JSON ที่ส่งมาใน Body เป็น struct Person
+		if err := c.BodyParser(person); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Invalid request data",
+			})
+		}
+
+		// หาผู้ใช้ที่มี ID ตรงกับที่ระบุ
+		for i, p := range people {
+			if p.ID == idInt {
+				// อัปเดตข้อมูล
+				// นำค่าของ person ที่เก็บค่าจาก JSON Body มาใช้
+				// people[i] เป็นค่าที่ชี้ไปยัง slice ของผู้ใช้ที่ตรงกับ ID ที่ส่งมาใน Request params
+				people[i].Name = person.Name
+				people[i].Email = person.Email
+				return c.Status(fiber.StatusOK).JSON(fiber.Map{
+					"message": "User updated successfully",
+					"data":    people[i], // ส่งข้อมูลผู้ใช้ที่อัปเดตกลับไป
+				})
+			}
+		}
+
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "User not found",
+		})
+	})
+
+	// DELETE: ลบข้อมูลผู้ใช้ตาม ID
+	// ตัวอย่าง URL: http://localhost:3000/users/1
+	app.Delete("/users/:id", func(c *fiber.Ctx) error {
+		id := c.Params("id")
+
+		// แปลง ID เป็นตัวเลข
+		idInt, err := strconv.Atoi(id)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Invalid user ID",
+			})
+		}
+
+		// หาผู้ใช้ที่มี ID ตรงกับที่ระบุ
+		for i, person := range people {
+			if person.ID == idInt {
+				// ลบผู้ใช้ออกจาก slice ของผู้ใช้
+				// Go จะไม่มี method สำหรับลบค่าออกจาก slice โดยตรงเหมือนกับ Array ในภาษาอื่น ๆ
+				people = append(people[:i], people[i+1:]...)
+				return c.Status(fiber.StatusOK).JSON(fiber.Map{
+					"message": "User deleted successfully",
+					"data":    person,
+				})
+			}
+		}
+
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "User not found",
+		})
 	})
 
 	// เริ่มต้นเซิร์ฟเวอร์ที่พอร์ต 3000

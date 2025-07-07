@@ -19,3 +19,8 @@
 
 # Go workspace file
 go.work
+
+# Air (Go live reload tool)
+.air.toml
+tmp/
+air_tmp/
