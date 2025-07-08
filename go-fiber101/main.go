@@ -268,6 +268,12 @@ func main() {
 				// ลบผู้ใช้ออกจาก slice ของผู้ใช้
 				// Go จะไม่มี method สำหรับลบค่าออกจาก slice โดยตรงเหมือนกับ Array ในภาษาอื่น ๆ
 				people = append(people[:i], people[i+1:]...)
+				// 1. ใช้ append เพื่อสร้าง slice ใหม่ที่ไม่มีค่าที่ต้องการลบ
+				// 2. ใช้ slice operator [:i] = ข้อมูลก่อนตำแหน่ง i
+				// 3. ใช้ slice operator [i+1:] = ข้อมูลหลังตำแหน่ง i
+				// 4. append จะรวมทั้งสองส่วนเข้าด้วยกัน
+				// 5. ทำให้ slice ใหม่ไม่มีค่าที่ต้องการลบ
+
 				return c.Status(fiber.StatusOK).JSON(fiber.Map{
 					"message": "User deleted successfully",
 					"data":    person,
