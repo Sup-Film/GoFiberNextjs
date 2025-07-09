@@ -15,6 +15,14 @@ type UserService struct {
 }
 
 // สร้างฟังก์ชั่นสำหรับ NewUserService สร้างผู้ใช้ใหม่
+// ฟังก์ชั่นนี้เปรียบเสมือนเป็น constructor ใน OOP
+// โดยจะคืนค่า UserService ที่มี slice ของผู้ใช้เริ่มต้นเป็นว่างเปล่า
+// และตัวนับ ID ถัดไปเริ่มต้นที่ 1
+// ฟังก์ชั่นนี้จะถูกเรียกใช้เมื่อเราต้องการสร้าง instance ของ UserService
+// เพื่อให้สามารถใช้งาน RegisterUser และ Login ได้
+// (NewUserService) คืนค่า *UserService ที่สร้างขึ้นใหม่
+// *UserService = pointer to UserService struct
+// ฟังก์ชั่นนี้จะถูกเรียกใช้ใน main.go เพื่อสร้าง instance ของ UserService
 func NewUserService() *UserService {
 	return &UserService{
 		users:  []models.User{}, // เริ่มต้นด้วย slice ว่าง

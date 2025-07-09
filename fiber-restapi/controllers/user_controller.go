@@ -13,11 +13,16 @@ type UserController struct {
 }
 
 // สร้าง NewUserController ฟังก์ชั่นสำหรับสร้าง UserController ใหม่
+// Function นี้เปรียบเสมือนเป็น constructor ใน OOP เป็นการสร้าง instance ของ UserController
+// โดยรับ UserService เป็นพารามิเตอร์
+// และคืนค่า UserController ที่มี UserService ที่ถูกกำหนดไว้
 func NewUserController(userService *services.UserService) *UserController {
 	return &UserController{
 		UserService: userService,
 	}
 }
+
+// Function อื่น ๆ จะเหมือนกับ Methods ใน OOP
 
 // RegisterHandlers สำหรับการลงทะเบียนผู้ใช้ใหม่
 func (ctrl *UserController) RegisterHandlers(c *fiber.Ctx) error {
