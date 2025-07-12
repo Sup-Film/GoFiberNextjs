@@ -1,14 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
+	"github.com/Sup-Film/fiber-nextjs-ecommerce/config"
+	"github.com/Sup-Film/fiber-nextjs-ecommerce/internal/adapters/db"
 	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
+	// load configuration
+	cfg := config.LoadConfig()
+
 	// Create fiber instance
 	app := fiber.New()
+
+	// Connect DB & Auto Migrate Models
+	db.Connect(cfg)
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
@@ -17,6 +26,7 @@ func main() {
 	})
 
 	// Start the server
-	log.Fatal(app.Listen(":3000"))
-	log.Println("Server is running on http://localhost:3000")
+	// การ Listen จะต้องใช้ string format สำหรับพอร์ต เลยต้องใช้ fmt.Sprintf
+	log.Fatal(app.Listen(fmt.Sprintf(":%s", cfg.AppPort)))
+	log.Println("Server is running on http://localhost:" + cfg.AppPort)
 }
